@@ -10,6 +10,10 @@ CREATE TABLE usuarios(
     idade INT
 );
 
+-- cmd:
+
+mysql -h localhost -u root -p
+
 SHOW TABLES;
 
 DESCRIBE usuarios;
