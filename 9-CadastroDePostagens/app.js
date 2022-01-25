@@ -26,6 +26,11 @@ app.get('/cadastro', function(req, res){
     res.render('formulario')
 })
 
+app.post('/adicionar', function(req, res){ // 'post' só pode ser acessada quando alguém faz requisiçao com método post
+    res.send('Formulário recebido!')})
+
+// existem rotas get, post, delete, put, path,... pela url, só se consegue acessar rotas do tipo get
+
 app.listen(8090, function(){
     console.log('Servidor rodando na url http://localhost:8090')
 });
