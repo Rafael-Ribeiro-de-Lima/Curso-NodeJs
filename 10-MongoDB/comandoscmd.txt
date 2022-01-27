@@ -1,0 +1,6 @@
+Comandos para cmd/mongo
+
+mongod --> abre o servidor
+mongosh --> inicial o shell
+show databases;
+use 'nome' --> cria banco de dados novo
