@@ -1,0 +1,5 @@
+Instalar express, handlebars, bodyparser, mongoose, express-session, connect-flash
+
+pasta 'partials' em 'views' consegue definir o template por partes
+
+Middleware é um programa intermediário entre o cliente o servidor. Toda comunicação entre o cliente o servidor é 'observada' pelo middleware. São todos os 'app.use()'
