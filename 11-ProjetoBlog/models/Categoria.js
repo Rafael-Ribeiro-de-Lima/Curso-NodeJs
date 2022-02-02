@@ -1,3 +1,5 @@
+//  MODEL DE CATEGORIAS
+
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
@@ -16,4 +18,4 @@ const Categoria = new Schema({
     }
 })
 
-mongoose.model('categorias', Categoria)
+mongoose.model('categorias', Categoria) // nome dado ao model

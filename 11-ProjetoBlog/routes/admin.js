@@ -1,9 +1,11 @@
+const { Router } = require('express')
 const express = require('express')
 const router = express.Router() // componente utilizado para criar rotas em arquivos separados
 const mongoose = require('mongoose')
-require('../models/Categoria')
+require('../models/Categoria') // carrega model de categoria
 const Categoria = mongoose.model('categorias') // Referencia do Model. Nome do model é o nome dado no arquivo Categoria.js
-
+require('../models/Postagem') // carrega model de postagem
+const Postagem = mongoose.model('postagens')
 
 
 // ROTAS
@@ -95,6 +97,65 @@ router.post('/categorias/deletar', function(req, res){
         req.flash('error_msg', 'Erro ao deletar categoria!')
         res.redirect('/admin/categorias')
     }) //id do campo input hidden 
+})
+
+router.get('/postagens', function(req, res){
+    Postagem.find().lean().populate('categoria').sort({data: 'desc'}).then(function(postagens){ // 
+        res.render('admin/postagens', {postagens: postagens}) // renderiza a pagina com as postagens
+    }).catch(function(err){
+        req.flash('error_msg', 'Houve um erro ao listar as postagens')
+        res.redirect('/admin')
+    })
+})
+
+router.get('/postagens/add', function(req, res){
+    Categoria.find().lean().sort({nome: 'asc'}).then(function(categorias){ // find retorna todas as categorias
+        res.render('admin/addpostagem', {categorias: categorias})
+    }).catch(function(err){
+        req.flash('error_msg', 'Houve um erro ao carregar o formulário.')
+        res.redirect('/admin')
+    })
+})
+
+router.post('/postagens/nova', function(req, res){
+    var erros = []
+    if(req.body.categoria == '0'){ // esse 0 foi definido no value do html
+        erros.push({texto: 'Categoria Inválida! Registre uma categoria.'})
+    }
+
+    if (erros.length>0){
+        res.render('/admin/addpostagem', {erros: erros})
+    } else{
+        const novaPostagem = {
+            titulo: req.body.titulo,
+            descricao: req.body.descricao,
+            conteudo: req.body.conteudo,
+            categoria: req.body.categoria,
+            slug: req.body.slug
+        }
+        new Postagem(novaPostagem).save().then(function(){
+            req.flash('success_msg', 'Postagem criada com sucesso!')
+            res.redirect('/admin/postagens')
+        }).catch(function(err){
+            req.flash('error_msg', 'Houve um erro durante o salvamento da postagem!')
+            res.redirect('/admin/postagens')
+        })
+    }
+})
+
+router.get('/postagens/edit/:id', function(req, res){
+    Postagem.findOne({_id: req.params.id}).lean().then(function(postagem){// Pesquisa por uma POSTAGEM. É params pq o id foi passado como parametro ali em cima no /:id. 
+        Categoria.find().lean().then(function(categorias){
+            res.render('admin/editPostagens', {categorias: categorias, postagem: postagem}) // Pesquisa pela CATEGORIA
+        }).catch(function(err){
+            req.flash('error_msg', 'Houve um erro ao carregar as categorias!')
+            res.redirect('/admin/postagens')
+        })
+    }).catch(function(err){
+        req.flash('error_msg', 'Houve um erro ao carregar o formulário de edição!')
+        res.redirect('/admin/postagens')
+    })
+    
 })
 
 module.exports = router
