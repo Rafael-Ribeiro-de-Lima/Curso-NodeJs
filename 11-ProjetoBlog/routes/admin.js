@@ -1,5 +1,6 @@
 const { Router } = require('express')
 const express = require('express')
+const { rmSync } = require('fs')
 const router = express.Router() // componente utilizado para criar rotas em arquivos separados
 const mongoose = require('mongoose')
 require('../models/Categoria') // carrega model de categoria
@@ -108,6 +109,8 @@ router.get('/postagens', function(req, res){
     })
 })
 
+// O populate permite que você referencie documentos de uma collection em outra. Pra você usar informações da collection "categorias" dentro da collection "postagens", você chama "categorias" através do populate
+
 router.get('/postagens/add', function(req, res){
     Categoria.find().lean().sort({nome: 'asc'}).then(function(categorias){ // find retorna todas as categorias
         res.render('admin/addpostagem', {categorias: categorias})
@@ -145,7 +148,7 @@ router.post('/postagens/nova', function(req, res){
 
 router.get('/postagens/edit/:id', function(req, res){
     Postagem.findOne({_id: req.params.id}).lean().then(function(postagem){// Pesquisa por uma POSTAGEM. É params pq o id foi passado como parametro ali em cima no /:id. 
-        Categoria.find().lean().then(function(categorias){
+        Categoria.find().lean().sort({nome: 'asc'}).then(function(categorias){
             res.render('admin/editPostagens', {categorias: categorias, postagem: postagem}) // Pesquisa pela CATEGORIA
         }).catch(function(err){
             req.flash('error_msg', 'Houve um erro ao carregar as categorias!')
@@ -154,8 +157,37 @@ router.get('/postagens/edit/:id', function(req, res){
     }).catch(function(err){
         req.flash('error_msg', 'Houve um erro ao carregar o formulário de edição!')
         res.redirect('/admin/postagens')
+    })  
+})
+
+router.post('/postagem/edit', function(req, res){ // url é a action do formulário nesse caso
+    Postagem.findOne({_id: req.body.id}).then(function(postagem){ // esse id é o id do input hidden. Nesse caso, esse método busca uma postagem que possui o _id igual ao id='id'
+        postagem.titulo = req.body.titulo
+        postagem.slug = req.body.slug
+        postagem.descricao = req.body.descricao
+        postagem.conteudo = req.body.conteudo
+        postagem.categoria = req.body.categoria
+        postagem.data = Date.now()
+
+        postagem.save().then(function(){
+            req.flash('success_msg', 'Postagem editada com sucesso!')
+            res.redirect('/admin/postagens')
+        })
+    }).catch(function(err){
+        console.log(err)
+        req.flash('error_msg', 'Houve um erro ao editar a postagem!')
+        res.redirect('/admin/postagens')
     })
-    
+})
+
+router.get('/postagens/deletar/:id', function(req, res){
+    Postagem.remove({_id: req.params.id}).then(function(){
+        req.flash('success_msg', 'Postagem deletada com sucesso!')
+        res.redirect('/admin/postagens')
+    }).catch(function(err){
+        req.flash('error_msg', 'Houve um erro interno.')
+        res.redirect('/admin/postagens')
+    })
 })
 
 module.exports = router

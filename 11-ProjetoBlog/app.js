@@ -9,6 +9,13 @@ const path = require('path') // módulo para trabalhar com pastas
 const mongoose = require('mongoose')
 const session = require('express-session')
 const flash = require('connect-flash') // tipo de sessão que só aparece uma vez, quando a página é recarregada, ela não está mais lá, como a mensagem "categoria criada com sucesso"
+require('./models/Postagem')
+const Postagem = mongoose.model('postagens')
+require('./models/Categoria')
+const Categoria = mongoose.model('categorias')
+const usuarios = require('./routes/usuario')
+const passport = require('passport')
+require('./config/auth')
 
 
 
@@ -20,7 +27,9 @@ const flash = require('connect-flash') // tipo de sessão que só aparece uma ve
         saveUninitialized: true
     }))
 
-    app.use(flash()) // deve ficar abaixo a sessão
+    app.use(passport.initialize())
+    app.use(passport.session()) 
+    app.use(flash()) // devem ficar abaixo a sessão. configuram o passport e o flash
 
     //  MIDDLEWARE
     app.use(function(req, res, next){
@@ -62,7 +71,66 @@ const flash = require('connect-flash') // tipo de sessão que só aparece uma ve
 
 //  ROTAS (quando se trabalha com muitas rotas, é melhor salvar em outro local)
 
+app.get('/', function(req, res){
+    Postagem.find().lean().populate('categoria').sort({data: 'desc'}).then(function(postagens){
+        res.render('index', {postagens: postagens})
+    }).catch(function(err){
+        req.flash('error_msg', 'Erro! Não foi possível carregar as postagens.')
+        res.redirect('/404')
+    })
+})
+
+app.get('/postagem/:slug', function(req, res){
+    Postagem.findOne({slug: req.params.slug}).lean().then(function(postagem){
+        if(postagem){
+            res.render('postagem/index', {postagem: postagem})
+        } else{
+            req.flash('error_msg', 'Esta postagem não existe!')
+            res.redirect('/')
+        }
+    }).catch(function(err){
+        req.flash('error_msg', 'Houve um erro!')
+        res.redirect('/')
+    })
+})
+
+app.get('/categorias', function(req, res){
+    Categoria.find().lean().sort({nome: 'asc'}).then(function(categorias){
+        res.render('categorias/index', {categorias: categorias})
+    }).catch(function(err){
+        req.flash('error_msg', 'Houve um erro ao listar as categorias')
+        res.redirect('/')
+    })
+    res.render
+})
+
+app.get('/categorias/:slug', function(req, res){
+    Categoria.findOne({slug: req.params.slug}).lean().then(function(categoria){
+        if(categoria){
+            Postagem.find({categoria: categoria._id}).lean().then(function(postagens){
+                res.render('categorias/postagens', {postagens: postagens, categoria: categoria})
+            }).catch(function(err){
+                req.flash('error_msg', 'Houve um erro ao listar as postagens!')
+                res.redirect('/')
+            })
+
+        }else{
+            req.flash('error_msg', 'Esta categoria não existe!')
+            res.redirect('/')
+        }
+    }).catch(function(err){
+        req.flash('error_msg', 'Houve um erro interno ao carregar a página dessa categoria')
+        res.redirect('/')
+    })
+})
+
+app.get('/404', function(req, res){
+    res.send('ERRO 404!')
+})
+
 app.use('/admin', admin) // O '/admin' é o prefixo para acessar as rotas na variável admin
+
+app.use('/usuario', usuarios) // precisa importar a rota com o require
 
 
 //  OUTROS

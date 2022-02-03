@@ -28,7 +28,12 @@ const Postagem = new Schema({
     data: {
         type: Date,
         default: Date.now()
+    },
+    criacao: {
+        type: Date,
+        default: Date.now()
     }
+
 })
 
 mongoose.model('postagens', Postagem) // cria collection para o módulo com nome 'postagens'

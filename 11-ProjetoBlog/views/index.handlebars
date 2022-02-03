@@ -1,0 +1,30 @@
+<div class="bg-light p-5 rounded-lg mt-2">
+  <h1 class="display-4">Bem-vindo ao Blog do Node!</h1>
+  <p class="lead">Um blog desenvolvido com Node.js + Express.Js + MongoDB</p>
+  <hr class="my-4">
+  <p class='lead'>Faça parte da comunidade Node.js!</p>
+  <a class="btn btn-primary btn-lg" href="#" role="button">Registrar-se</a>
+</div>
+
+<hr class="my-4">
+
+<h2>Postagens Recentes:</h2>
+
+{{#each postagens}}
+<div class="card mt-3">
+    <div class="card-body">
+        <h3>{{titulo}}</h3>
+        <p>{{descricao}}</p>
+        <a href="/postagem/{{slug}}" class='btn btn-primary'>Leia mais</a>
+        <hr>
+        <small>Área: {{categoria.nome}}</small>
+        <br>
+        <small>Última atualização {{data}}</small>
+    </div>
+</div>
+{{else}}
+    <h5 class='mt-3'>Nenhuma postagem registrada!</h5>
+{{/each}}
+
+
+
