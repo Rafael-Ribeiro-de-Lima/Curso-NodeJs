@@ -15,7 +15,7 @@ require('./models/Categoria')
 const Categoria = mongoose.model('categorias')
 const usuarios = require('./routes/usuario')
 const passport = require('passport')
-require('./config/auth')
+require('./config/auth')(passport)
 
 
 
@@ -35,6 +35,8 @@ require('./config/auth')
     app.use(function(req, res, next){
         res.locals.success_msg = req.flash('success_msg') // res.locals cria variável global
         res.locals.error_msg = req.flash('error_msg')
+        res.locals.error = req.flash('error')
+        res.locals.user = req.user || null // armazena os dados do usuario autenticado/logado
         next()
     })
 

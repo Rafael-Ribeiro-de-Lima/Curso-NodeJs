@@ -7,20 +7,22 @@ require('../models/Categoria') // carrega model de categoria
 const Categoria = mongoose.model('categorias') // Referencia do Model. Nome do model é o nome dado no arquivo Categoria.js
 require('../models/Postagem') // carrega model de postagem
 const Postagem = mongoose.model('postagens')
+const {eAdmin} = require('../helpers/eAdmin') // {} pega apenas a função eAdmin. Para proteger as rotas, basta colocar o eAdmin ao lado do endereço
+
 
 
 // ROTAS
 
 
-router.get('/', function(req, res){
+router.get('/', eAdmin, function(req, res){
     res.render('admin/index') // views/admin/index
 })
 
-router.get('/posts', function(req, res){
+router.get('/posts', eAdmin, function(req, res){
     res.send('Página de posts')
 })
 
-router.get('/categorias', function(req, res){
+router.get('/categorias', eAdmin, function(req, res){
     Categoria.find().lean().sort({date: 'desc'}).then(function(categorias){
         res.render('admin/categorias', {categorias: categorias})
     }).catch(function(err){
@@ -29,11 +31,11 @@ router.get('/categorias', function(req, res){
     })
 })
 
-router.get('/categorias/add', function(req, res){
+router.get('/categorias/add', eAdmin, function(req, res){
     res.render('admin/addcategorias')
 })
 
-router.post('/categorias/nova', function(req, res){
+router.post('/categorias/nova', eAdmin, function(req, res){
 
     var erros = []
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
@@ -64,7 +66,7 @@ router.post('/categorias/nova', function(req, res){
     }
 })
 
-router.get('/categorias/edit/:id', function(req, res){
+router.get('/categorias/edit/:id', eAdmin, function(req, res){
     Categoria.findOne({_id:req.params.id}).lean().then(function(categoria){ // é .params porque estamos trabalhando com parametros e não com formulários
         res.render('admin/editCategorias', {categoria: categoria})
     }).catch(function(err){
@@ -73,7 +75,7 @@ router.get('/categorias/edit/:id', function(req, res){
     }) // pesquisa o registro que tem id igual ao da url 
 })
 
-router.post('/categorias/edit', function(req, res){
+router.post('/categorias/edit', eAdmin, function(req, res){
     Categoria.findOne({_id: req.body.id}).then(function(categoria){// pega o id do input hidden 
         categoria.nome = req.body.nome
         categoria.slug = req.body.slug // recebe os valores digitados
@@ -90,7 +92,7 @@ router.post('/categorias/edit', function(req, res){
     })   
 }) // Essa rota aplica as edições feitas em uma categoria
 
-router.post('/categorias/deletar', function(req, res){
+router.post('/categorias/deletar', eAdmin, function(req, res){
     Categoria.deleteOne({_id: req.body.id}).then(function(){
         req.flash('success_msg', 'Categoria deletada com sucesso!')
         res.redirect('/admin/categorias')
@@ -100,7 +102,7 @@ router.post('/categorias/deletar', function(req, res){
     }) //id do campo input hidden 
 })
 
-router.get('/postagens', function(req, res){
+router.get('/postagens', eAdmin, function(req, res){
     Postagem.find().lean().populate('categoria').sort({data: 'desc'}).then(function(postagens){ // 
         res.render('admin/postagens', {postagens: postagens}) // renderiza a pagina com as postagens
     }).catch(function(err){
@@ -111,7 +113,7 @@ router.get('/postagens', function(req, res){
 
 // O populate permite que você referencie documentos de uma collection em outra. Pra você usar informações da collection "categorias" dentro da collection "postagens", você chama "categorias" através do populate
 
-router.get('/postagens/add', function(req, res){
+router.get('/postagens/add', eAdmin, function(req, res){
     Categoria.find().lean().sort({nome: 'asc'}).then(function(categorias){ // find retorna todas as categorias
         res.render('admin/addpostagem', {categorias: categorias})
     }).catch(function(err){
@@ -120,7 +122,7 @@ router.get('/postagens/add', function(req, res){
     })
 })
 
-router.post('/postagens/nova', function(req, res){
+router.post('/postagens/nova', eAdmin, function(req, res){
     var erros = []
     if(req.body.categoria == '0'){ // esse 0 foi definido no value do html
         erros.push({texto: 'Categoria Inválida! Registre uma categoria.'})
@@ -146,7 +148,7 @@ router.post('/postagens/nova', function(req, res){
     }
 })
 
-router.get('/postagens/edit/:id', function(req, res){
+router.get('/postagens/edit/:id', eAdmin, function(req, res){
     Postagem.findOne({_id: req.params.id}).lean().then(function(postagem){// Pesquisa por uma POSTAGEM. É params pq o id foi passado como parametro ali em cima no /:id. 
         Categoria.find().lean().sort({nome: 'asc'}).then(function(categorias){
             res.render('admin/editPostagens', {categorias: categorias, postagem: postagem}) // Pesquisa pela CATEGORIA
@@ -160,7 +162,7 @@ router.get('/postagens/edit/:id', function(req, res){
     })  
 })
 
-router.post('/postagem/edit', function(req, res){ // url é a action do formulário nesse caso
+router.post('/postagem/edit', eAdmin, function(req, res){ // url é a action do formulário nesse caso
     Postagem.findOne({_id: req.body.id}).then(function(postagem){ // esse id é o id do input hidden. Nesse caso, esse método busca uma postagem que possui o _id igual ao id='id'
         postagem.titulo = req.body.titulo
         postagem.slug = req.body.slug
@@ -180,7 +182,7 @@ router.post('/postagem/edit', function(req, res){ // url é a action do formulá
     })
 })
 
-router.get('/postagens/deletar/:id', function(req, res){
+router.get('/postagens/deletar/:id', eAdmin, function(req, res){
     Postagem.remove({_id: req.params.id}).then(function(){
         req.flash('success_msg', 'Postagem deletada com sucesso!')
         res.redirect('/admin/postagens')
