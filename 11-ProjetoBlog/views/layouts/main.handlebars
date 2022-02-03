@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog NodeJs</title>
+    <title>Blog do Node</title>
     <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="shortcut icon" href="../../public/img/R_logo.ico" type="image/x-icon">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -23,13 +24,15 @@
           <a class="nav-link" href="/categorias">Categorias</a>
         </li>
         {{#if user}} <!-- Esse user vem da variável global user, no res.local.user em app.js -->
-
+        <li class="nav-item">
+          <a href="/usuario/logout" class="nav-link">Sair</a>
+        </li>
         {{else}}
         <li class="nav-item">
-          <a class="nav-link disabled">Login</a>
+          <a href="/usuario/login" class="nav-link">Login</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link disabled">Registro</a>
+          <a href="/usuario/registro" class="nav-link">Registro</a>
         </li>
         {{/if}}
       </ul>
