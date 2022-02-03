@@ -17,8 +17,6 @@ const usuarios = require('./routes/usuario')
 const passport = require('passport')
 require('./config/auth')(passport)
 
-
-
 //  CONFIGURAÇÕES
     //  SESSÃO
     app.use(session({
@@ -32,6 +30,7 @@ require('./config/auth')(passport)
     app.use(flash()) // devem ficar abaixo a sessão. configuram o passport e o flash
 
     //  MIDDLEWARE
+
     app.use(function(req, res, next){
         res.locals.success_msg = req.flash('success_msg') // res.locals cria variável global
         res.locals.error_msg = req.flash('error_msg')
@@ -39,6 +38,8 @@ require('./config/auth')(passport)
         res.locals.user = req.user || null // armazena os dados do usuario autenticado/logado
         next()
     })
+    
+
 
     //  BODY PARSER
     app.use(bodyParser.urlencoded({ extended: true })) // O extended ser true significa que os valores analisados no body podem ser de qualquer tipo. Se fosse falso, seriam aceitos apenas strings e arrays
@@ -133,7 +134,6 @@ app.get('/404', function(req, res){
 app.use('/admin', admin) // O '/admin' é o prefixo para acessar as rotas na variável admin
 
 app.use('/usuario', usuarios) // precisa importar a rota com o require
-
 
 //  OUTROS
 const PORT = 8081
