@@ -1,16 +1,14 @@
 const express = require('express');
 const app = express();
 const { engine } = require('express-handlebars');
-const Sequelize = require('sequelize')
-
-
+const bodyParser = require('body-parser')
+const Post = require('./models/Post')
 
 //  CONFIG
     //  TEMPLATE ENGINE  
     app.engine('handlebars', engine({ extname: '.hbs', defaultLayout: "main.handlebars"}));
     app.set('view engine', 'handlebars');
     app.set("views", "./views");
-<<<<<<< HEAD:09-CadastroDePostagens/app.js
     
     //  BODY PARSER
     app.use(bodyParser.urlencoded({extended: false}))
@@ -29,26 +27,26 @@ app.get('/', function(req, res){
     // order por id ordena os dados por id, podendo ser 'DESC' (do mais antigo pro mais novo) ou 'ASC'
     // render renderiza o arquivo home.handlebars e nas chaves pode colocar qualquer dado para o front-end (handlebars)
 
-=======
-    app.get('/', (req, res) => {
-        res.render('home');
-    });
-
-    //  CONEXÃO COM O BANCO DE DADOS
-    const sequelize = new Sequelize('test', 'root', '@Rafael123', {
-        host: 'localhost',
-        dialect: 'mysql'
-    })
-
-//  ROTAS
-
->>>>>>> parent of 6e0a30c (atualizações):9-CadastroDePostagens/app.js
 app.get('/cadastro', function(req, res){
     res.render('formulario')
 })
 
-app.post('/adicionar', function(req, res){ // 'post' só pode ser acessada quando alguém faz requisiçao com método post
-    res.send('Formulário recebido!')})
+app.post('/adicionar', function(req, res){ 
+    Post.create({
+        titulo: req.body.titulo,
+        conteudo: req.body.conteudo
+    }).then(function(){
+        res.redirect('/') // Redireciona após fazer a postagem.
+    }).catch(function(erro){
+        res.send(`Houve um erro: ${erro}`)
+    })
+})
+    //res.send(`Texto: ${req.body.titulo} Conteúdo: ${req.body.conteudo}`)})
+
+// 'post' só pode ser acessada quando alguém faz requisiçao com método post
+
+// Graças ao bodyparser, pode-se salvar os dados enviados pelo formulário de forma simples, utilizando req.body."nameDaTag"
+
 
 // existem rotas get, post, delete, put, path,... pela url, só se consegue acessar rotas do tipo get
 
